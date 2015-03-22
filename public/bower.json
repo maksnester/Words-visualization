@@ -1,0 +1,6 @@
+{
+  "name": "DS lab 1",
+  "dependencies": {
+    "bootstrap": "~3.3.4"
+  }
+}
