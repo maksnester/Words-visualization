@@ -18,16 +18,26 @@ db.open(function(err){
 });
 
 function startServer() {
-    app.get('/', function (req, res, next) {
+    app.get('/', function (req, res) {
         res.render('index.jade');
+    });
+
+    app.get('/words', function (req, res, next) {
+        db.collection('words').find({}, {"_id": 1}).sort({"_id": 1}).toArray(function(err, result) {
+            if (err) return next(err);
+            // send all words
+            res.send(result);
+        });
     });
 
     app.use(express.static(__dirname + '/public'));
 
+    // not found
     app.use(function (req, res, next) {
         res.status(404).send("Not found");
     });
 
+    //internal server error
     app.use(function (err, req, res, next) {
         console.error(err);
         console.error("Request was: " + req);
