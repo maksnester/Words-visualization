@@ -2,7 +2,7 @@
 var startTime = Date.now();
 var endTime;
 
-var sourceDir = "D:\\Учеба\\типо Распределенные системы\\lab1\\";
+var sourceDir = __dirname + "/data/";
 
 var config = {
     book1: sourceDir + 'Brealey R. - Principles of Corporate Finance (10th Edition) - 2010.txt',
@@ -43,10 +43,11 @@ db.open(function(err, db) {
     var words = union_arrays(firstBookResults.words, secondBookResults.words);
     var sentences = union_arrays(firstBookResults.sentences, secondBookResults.sentences);
 
-    console.log("Go to slice cycle.");
+    console.log("Go to splice cycle.");
 
     //оставляем только те слова, которые есть в словаре
-    for (var i = 0; i < words.length; i++) {
+    i = words.length;
+    while(i--) {
         var ind = dictionary.indexOf(words[i]);
         if (ind === -1) {
             words.splice(i, 1); // удаляем слово, т.к. его нет в словаре
@@ -54,6 +55,13 @@ db.open(function(err, db) {
     }
 
     console.log("End slice cycle.");
+
+    console.log("Removing duplicates");
+
+    //удаляем дубликаты
+    removeDuplicates(words);
+
+    console.log("Duplicates removed");
 
     // трансформируем строки в объекты для монги
     // в качестве _id оставляем само слово, т.к. оно уникально
@@ -69,32 +77,43 @@ db.open(function(err, db) {
     //аналогично для предложений, но тут в качестве ключа используем просто индекс предложения
     i = sentences.length;
     while (i--) {
-        var foundWords = sentences[i].match(/([A-z'-]{3,}\b)(?!.*\1\b)/g);
+        //все уникальные слова в предложении
+        var foundWords = sentences[i].match(/[A-z'-]{3,}/g);
+        removeDuplicates(foundWords);
+
+        //попутно переводим предложение в объектную форму
         sentences[i] = {"_id": i, "text": sentences[i]};
 
-        //для каждого слова из текущего предложения проверяем, что это слово есть в words
-        //если оно есть, то в links к нему добавляем все прочие найденные слова
         if (foundWords) {
-            foundWords.forEach(function (elem, index) {
-                var indexInWords = words.indexOf(elem);
-                if (indexInWords > -1) {
-                    for (var k = 0; k < foundWords.length; k++) {
-                        // само к себе слово не учитывается
-                        if (k !== index) {
-                            finalWords[indexInWords].links.push({
-                                "_word" : foundWords[k],
-                                "_sentence" : i
-                            });
-                        }
+            //оставляем только те, слова, что есть в словаре.
+            var k = foundWords.length;
+            while(k--) {
+                var ind = words.indexOf(foundWords[k]);
+                // такого слова нет - выкидываем его
+                if (ind < 0) {
+                    foundWords.splice(k, 1);
+                }
+            }
+
+            for (var z = foundWords.length - 1; z > -1; z--) {
+                //для каждого слова из текущего предложения, берём его индекс в words
+                var indexInWords = words.indexOf(foundWords[z]);
+                k = foundWords.length;
+                while(k--) {
+                    // само к себе слово не учитывается
+                    if (k !== z) {
+                        //индексы в finalWords и words одинаковые
+                        finalWords[indexInWords].links.push({
+                            "_word": foundWords[k],
+                            "_sentence": i
+                        });
                     }
                 }
-            });
+            }
         }
     }
 
     console.log("End final cycle.");
-
-    var sync = 2;
 
     db.collection('words').insert(finalWords, function(err, result) {
         if (err) console.log(err);
@@ -140,4 +159,16 @@ function parseBook(book) {
     var words = data.toString().match(/[A-z'-]{3,}/g);
 
     return {"sentences": sentences, "words": words};
+}
+
+function removeDuplicates(array) {
+    if (!array) return;
+    //удаляем дубликаты
+    for (var i = 0; i < array.length; i++) {
+        var ind = array.indexOf(array[i], i+1);
+        while (ind > 0) {
+            array.splice(ind, 1); // удаляем слово, т.к. его нет в словаре
+            ind = array.indexOf(array[i], ind);
+        }
+    }
 }
