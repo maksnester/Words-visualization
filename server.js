@@ -22,10 +22,23 @@ function startServer() {
         res.render('index.jade');
     });
 
-    app.get('/words', function (req, res, next) {
-        db.collection('words').find({}, {"_id": 1}).sort({"_id": 1}).toArray(function(err, result) {
+    //app.get('/words', function (req, res, next) {
+    //    db.collection('words').find({}, {"_id": 1}).sort({"_id": 1}).toArray(function(err, result) {
+    //        if (err) return next(err);
+    //        // send all words
+    //        res.send(result);
+    //    });
+    //});
+
+    app.get('/words/:id?', function (req, res, next) {
+        var regExp;
+        var findObj = {};
+        if (req.params.id) {
+            regExp = new RegExp("^" + req.params.id.replace(/\*/g, '.*') + "$");
+            findObj._id = regExp;
+        }
+        db.collection('words').find(findObj).sort({"_id": 1}).toArray(function(err, result) {
             if (err) return next(err);
-            // send all words
             res.send(result);
         });
     });

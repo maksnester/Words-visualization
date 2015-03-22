@@ -24,15 +24,15 @@ $(document).on('ready', function () {
 });
 
 function getWords() {
-    var wordsUrl = "words";
+    clearContainers();
     var searched = $('#search > input')[0].value;
     if (searched) {
         searched = searched.trim();
-        if (searched.length > 0) wordsUrl = searched;
+        if (searched.length < 1) searched = "";
     }
     showLoader(WORDS);
     $.ajax({
-        url: window.location.href + wordsUrl,
+        url: window.location.href + "words/" + searched,
         method: "get",
         success: function (jqXHR) {
             hideLoader(WORDS, function() {
@@ -76,5 +76,15 @@ function convertWordsListToStr(array) {
         arrayOfWords[arrayOfWords.length] = array[i]._id;
     }
     return ('<li>' + arrayOfWords.join('</li><li>') + '</li>');
+}
+
+function clearContainers() {
+    for (var c in containers) {
+        if (containers.hasOwnProperty(c)) {
+            while (containers[c][0].firstChild) {
+                containers[c][0].removeChild(containers[c][0].firstChild);
+            }
+        }
+    }
 }
 //TODO search $("window").scrollTop($("*:contains('search text here'):eq(n)").offset().top); n - nth mathc
