@@ -1,19 +1,11 @@
 'use strict';
 
-var ajaxLoader = document.createElement('div');
-ajaxLoader.className = 'ajaxLoader';
-
-var loaders = {
-    "words": ajaxLoader,
-    "primary-links": ajaxLoader.cloneNode(),
-    "secondary-links": ajaxLoader.cloneNode()
-};
-
 var WORDS = 'words';
 var PRIMARY_LINKS = 'primary-links';
 var SECONDARY_LINKS = 'secondary-links';
 
 var containers;
+var loaders;
 
 $(document).on('ready', function () {
     containers =  {
@@ -21,6 +13,10 @@ $(document).on('ready', function () {
         "primary-links": $('#' + PRIMARY_LINKS),
         "secondary-links": $('#' + SECONDARY_LINKS)
     };
+
+    createAjaxLoaders();
+    addSearchEnterListener();
+    addWordsClickListeners();
 });
 
 function getWords() {
@@ -78,13 +74,49 @@ function convertWordsListToStr(array) {
     return ('<li>' + arrayOfWords.join('</li><li>') + '</li>');
 }
 
+function showPrimaryLinks(word) {
+    alert("ajax to primary links with word " + word);
+}
+
+function showSecondaryLinks(word) {
+    alert("ajax to secondary links with word " + word);
+}
+
+function addWordsClickListeners() {
+    containers[WORDS].on('click', '> li', function () {
+        showPrimaryLinks(this.textContent || this.innerText);
+    });
+    containers[PRIMARY_LINKS].on('click', '> li', function () {
+        showSecondaryLinks(this.textContent || this.innerText);
+    });
+}
+
 function clearContainers() {
     for (var c in containers) {
         if (containers.hasOwnProperty(c)) {
-            while (containers[c][0].firstChild) {
-                containers[c][0].removeChild(containers[c][0].firstChild);
-            }
+            containers[c].empty();
         }
     }
 }
-//TODO search $("window").scrollTop($("*:contains('search text here'):eq(n)").offset().top); n - nth mathc
+
+function addSearchEnterListener() {
+    var searchInput = document.querySelector('#search > input');
+    searchInput.onkeydown = function (event) {
+        var keyCode = event.which || event.keyCode;
+        //enter button
+        if (keyCode === 13) {
+            getWords();
+        }
+    }
+}
+
+function createAjaxLoaders() {
+    var ajaxLoader = document.createElement('div');
+    ajaxLoader.className = 'ajaxLoader';
+
+    loaders = {
+        "words": ajaxLoader,
+        "primary-links": ajaxLoader.cloneNode(),
+        "secondary-links": ajaxLoader.cloneNode()
+    };
+}
