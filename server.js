@@ -12,7 +12,7 @@ var db = new mongodb.Db('idb', server, {safe: false});
 var words;
 var sentences;
 
-db.open(function(err){
+db.open(function (err) {
     if (err) console.error(err);
     startServer();
 });
@@ -22,22 +22,22 @@ function startServer() {
         res.render('index.jade');
     });
 
-    //app.get('/words', function (req, res, next) {
-    //    db.collection('words').find({}, {"_id": 1}).sort({"_id": 1}).toArray(function(err, result) {
-    //        if (err) return next(err);
-    //        // send all words
-    //        res.send(result);
-    //    });
-    //});
-
     app.get('/words/:id?', function (req, res, next) {
         var regExp;
         var findObj = {};
+        var fieldObj = {_id: 1};
+        // searched word. Could be with *-symbol, then use regexp with .* instead of *
         if (req.params.id) {
             regExp = new RegExp("^" + req.params.id.replace(/\*/g, '.*') + "$");
             findObj._id = regExp;
         }
-        db.collection('words').find(findObj).sort({"_id": 1}).toArray(function(err, result) {
+
+        // if url like /words/blah?links=true, then fetch links too
+        if (req.query.links) {
+            fieldObj.links = 1;
+        }
+
+        db.collection('words').find(findObj, fieldObj).sort({"_id": 1}).toArray(function (err, result) {
             if (err) return next(err);
             res.send(result);
         });

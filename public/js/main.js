@@ -6,6 +6,7 @@ var SECONDARY_LINKS = 'secondary-links';
 
 var containers;
 var loaders;
+var currentWord;
 
 $(document).on('ready', function () {
     containers =  {
@@ -32,7 +33,7 @@ function getWords() {
         method: "get",
         success: function (jqXHR) {
             hideLoader(WORDS, function() {
-                containers[WORDS].append(convertWordsListToStr(jqXHR));
+                containers[WORDS].append(convertArrayToList(jqXHR, "_id"));
             });
         },
         error: function (jqXHR, error) {
@@ -40,6 +41,38 @@ function getWords() {
             hideLoader(WORDS);
         }
     })
+}
+
+function showPrimaryLinks(word) {
+    clearContainers([PRIMARY_LINKS, SECONDARY_LINKS]);
+    fillContainerWithLinks(word, PRIMARY_LINKS);
+}
+
+function showSecondaryLinks(word) {
+    clearContainers(SECONDARY_LINKS);
+    fillContainerWithLinks(word, SECONDARY_LINKS);
+}
+
+function fillContainerWithLinks(word, container) {
+    showLoader(container);
+    $.ajax({
+        url: window.location.href + "words/" + word + "?links=true",
+        method: 'get',
+        success: function(jqXHR) {
+            // object copy
+            if (container === PRIMARY_LINKS) currentWord = $.extend(true, {}, jqXHR);
+
+            if (jqXHR[0] && jqXHR[0].links) {
+                hideLoader(container, function() {
+                    containers[container].append(convertArrayToList(jqXHR[0].links, "_word"));
+                });
+            }
+        },
+        error: function(jqXHR, error) {
+            console.error(error);
+            hideLoader(container);
+        }
+    });
 }
 
 /**
@@ -66,20 +99,18 @@ function hideLoader(name, callback) {
     }, 1000);
 }
 
-function convertWordsListToStr(array) {
+/**
+ * Converts field from elements of array to string with li-nodes
+ * @param array
+ * @param field
+ * @returns {string}
+ */
+function convertArrayToList(array, field) {
     var arrayOfWords = [];
     for (var i = 0; i < array.length; i++) {
-        arrayOfWords[arrayOfWords.length] = array[i]._id;
+        arrayOfWords[arrayOfWords.length] = array[i][field];
     }
     return ('<li>' + arrayOfWords.join('</li><li>') + '</li>');
-}
-
-function showPrimaryLinks(word) {
-    alert("ajax to primary links with word " + word);
-}
-
-function showSecondaryLinks(word) {
-    alert("ajax to secondary links with word " + word);
 }
 
 function addWordsClickListeners() {
@@ -91,11 +122,44 @@ function addWordsClickListeners() {
     });
 }
 
-function clearContainers() {
-    for (var c in containers) {
-        if (containers.hasOwnProperty(c)) {
-            containers[c].empty();
+/**
+ * Clear specified or all containers
+ * @param array (optional)
+ */
+function clearContainers(array) {
+    var singleClear = function() {
+        containers[array].empty();
+    };
+
+    var specificClear = function() {
+        //array.forEach(function(elem) {
+        //    containers[elem].empty();
+        //});
+        for (var c in array) {
+            if (array.hasOwnProperty(c)) {
+                containers[array[c]].empty();
+            }
         }
+    };
+
+    var allClear = function() {
+        for (var c in containers) {
+            if (containers.hasOwnProperty(c)) {
+                containers[c].empty();
+            }
+        }
+    };
+
+    switch (typeof(array)) {
+        case "string" :
+            singleClear();
+            break;
+        case "object" :
+            specificClear();
+            break;
+        case "undefined":
+            allClear();
+            break;
     }
 }
 
