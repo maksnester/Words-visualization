@@ -102,10 +102,17 @@ db.open(function(err, db) {
                 while(k--) {
                     // само к себе слово не учитывается
                     if (k !== z) {
-                        //индексы в finalWords и words одинаковые
+
+                        //если внутри массива связей уже есть добавляемое слово, то просто добавляем предложение
+                        var linkIndex = indexOfObjByAttr(finalWords[indexInWords].links, "_word", foundWords[k]);
+                        if (linkIndex > -1) {
+                            finalWords[indexInWords].links[linkIndex]._sentences.push(i);
+                        }
+
+                        //иначе добавляем новое слово
                         finalWords[indexInWords].links.push({
                             "_word": foundWords[k],
-                            "_sentence": i
+                            "_sentences": [i]
                         });
                     }
                 }
@@ -122,9 +129,9 @@ db.open(function(err, db) {
         db.collection('sentences').insert(sentences, function(err, result) {
             if (err) console.log(err);
             console.log('done sentences');
-            db.close();
             endTime = new Date(Date.now() - startTime);
             console.log("Execution time: " + endTime.getMinutes() + "m " + endTime.getSeconds() + "s.");
+            db.close();
             process.exit();
         });
     });
@@ -171,4 +178,14 @@ function removeDuplicates(array) {
             ind = array.indexOf(array[i], ind);
         }
     }
+}
+
+function indexOfObjByAttr(array, attr, value) {
+    for(var i = 0; i < array.length; i += 1) {
+        if(array[i][attr] === value) {
+            return i;
+        }
+    }
+
+    return -1;
 }
