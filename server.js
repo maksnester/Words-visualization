@@ -31,7 +31,7 @@ function startServer() {
         var fieldObj = {_id: 1};
         // searched word. Could be with *-symbol, then use regexp with .* instead of *
         if (req.params.id) {
-            regExp = new RegExp("^" + req.params.id.replace(/\*/g, '.*') + "$");
+            regExp = new RegExp("^" + req.params.id.replace(/\*/gi, '.*') + "$");
             findObj._id = regExp;
         }
 
@@ -41,6 +41,13 @@ function startServer() {
         }
 
         db.collection('words').find(findObj, fieldObj).sort({"_id": 1}).toArray(function (err, result) {
+            if (err) return next(err);
+            res.send(result);
+        });
+    });
+
+    app.get('/sentences/:id', function (req, res, next) {
+        db.collection('sentences').find({"_id": parseInt(req.params.id, 10)}).toArray(function (err, result) {
             if (err) return next(err);
             res.send(result);
         });

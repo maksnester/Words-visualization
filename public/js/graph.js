@@ -1,6 +1,21 @@
 var nodes = [];
 var links = [];
 var graph;
+var cachedSentences = [];
+
+var sentenceContainer;
+
+$(document).on("ready", function () {
+    sentenceContainer = {
+        dom: $("#info"),
+        clearContainer: function () {
+            this.dom.empty()
+        },
+        appendSentence: function (text) {
+            this.dom.append('<p>' + text + '</p>')
+        }
+    };
+});
 
 /**
  * Creates d3 forced graph
@@ -54,11 +69,12 @@ function drawGraph(word, callback) {
         .data(nodes)
         .enter().append("g")
         .attr("class", "node")
+        .on("dblclick", dblclick)
         .call(drag);
 
     node.append("circle")
         .attr("class", "node-circle")
-        .attr("r", 12);
+        .attr("r", function(d) {return 8 + (d.sentences ? d.sentences.length * 3 : 1)});
 
     node.append("text")
         .attr("x", 12)
@@ -68,7 +84,8 @@ function drawGraph(word, callback) {
     link = svg.selectAll(".link")
         .data(links)
         .enter().append("line")
-        .attr("class", "link");
+        .attr("class", "link")
+        .attr("stroke-width", function(d) {return 1 + (d.target.sentences ? d.target.sentences.length - 1 : 0)});
 
     force.on("tick", function() {
         link.attr("x1", function(d) { return d.source.x; })
@@ -89,6 +106,26 @@ function drawGraph(word, callback) {
 
     function dragged(d) {
         d3.select(this).attr("x", d.x = d3.event.x).attr("y", d.y = d3.event.y);
+    }
+
+    //show sentences below
+    function dblclick(d) {
+        d3.event.stopPropagation();
+        d3.select(this).classed("choosen", true);
+        sentenceContainer.clearContainer();
+        if (!d.sentences || !d.sentences.length) return;
+        // if sentence already here:
+        d.sentences.forEach(function(elem, index) {
+            var ind = indexOfObjByAttr(cachedSentences, "_id", elem);
+            if (ind > -1) {
+                sentenceContainer.appendSentence(cachedSentences[ind].text);
+            } else {
+                $.when(getSentence(elem)).then(function() {
+                    ind = indexOfObjByAttr(cachedSentences, "_id", elem);
+                    sentenceContainer.appendSentence(cachedSentences[ind].text);
+                });
+            }
+        });
     }
 
     if (typeof callback === "function") callback();
@@ -128,8 +165,36 @@ function prepareData(data) {
     });
 }
 
+function getSentence(_id) {
+    return $.ajax({
+        url: window.location.href + "sentences/" + _id,
+        method: "get",
+        success: function (jqXHR) {
+            cachedSentences.push(jqXHR[0]);
+        },
+        error: function (jqXHR, error) {
+            console.error(error);
+        }
+    })
+}
+
+function showSentenceByWord(word) {
+
+}
+
 function clearGraph() {
     nodes = [];
     links = [];
+    cachedSentences = [];
     d3.select("svg").remove();
+}
+
+function indexOfObjByAttr(array, attr, value) {
+    for (var i = 0; i < array.length; i += 1) {
+        if (array[i] && array[i].hasOwnProperty(attr) && array[i][attr] === value) {
+            return i;
+        }
+    }
+
+    return -1;
 }

@@ -76,13 +76,23 @@ main > .row {
     border: none;
 }
 
-#graph {
+#rightpanels {
     height: 100%;
+}
+
+#graph {
+    height: 86%;
+}
+
+#info {
+    height: 14%;
+    overflow-wrap: break-word;
 }
 
 .link {
     stroke: #000;
-    stroke-width: 1px;
+    opacity: 0.5;
+    /*stroke-width: 1px;*/
 }
 
 .node-circle {
@@ -90,4 +100,8 @@ main > .row {
     fill: #ccc;
     stroke: #000;
     stroke-width: 2px;
+}
+
+.choosen > circle {
+    fill: #18ab31;
 }

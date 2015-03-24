@@ -138,9 +138,6 @@ function clearContainers(array) {
     };
 
     var specificClear = function() {
-        //array.forEach(function(elem) {
-        //    containers[elem].empty();
-        //});
         for (var c in array) {
             if (array.hasOwnProperty(c)) {
                 containers[array[c]].empty();
