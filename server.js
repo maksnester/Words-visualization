@@ -13,8 +13,11 @@ var words;
 var sentences;
 
 db.open(function (err) {
-    if (err) console.error(err);
-    startServer();
+    if (err) {
+        console.error(err);
+    } else {
+        startServer();
+    }
 });
 
 function startServer() {
