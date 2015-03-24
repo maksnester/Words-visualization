@@ -45,6 +45,7 @@ function getWords() {
 }
 
 function showPrimaryLinks(word) {
+    setGraphButtonEnabled(false);
     clearContainers([PRIMARY_LINKS, SECONDARY_LINKS]);
     fillContainerWithLinks(word, PRIMARY_LINKS);
 }

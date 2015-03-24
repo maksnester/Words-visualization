@@ -1,6 +1,5 @@
 var nodes = [];
 var links = [];
-var force;
 var graph;
 
 /**
@@ -16,26 +15,25 @@ function drawGraph(word, callback) {
     var height = graph.offsetHeight;
     var width = graph.offsetWidth;
 
-    var svg = d3.select("#graph").append("svg")
+    var svg = d3.select("#graph").append("svg:svg")
             .attr("width", width)
             .attr("height", height)
-        .append("g")
-            .call(d3.behavior.zoom().scaleExtent([1,8]).on("zoom", zoom))
-        .append("g");
+            .attr("pointer-event", "all")
+        .append("svg:g")
+            .call(d3.behavior.zoom().on("zoom", zoom))
+        .append("svg:g");
 
-    svg.append("rect")
-        .attr("class", "overlay")
+    svg.append("svg:rect")
         .attr("width", width)
-        .attr("height", height);
-
-
+        .attr("height", height)
+        .attr('fill', 'white');
 
     var link = svg.selectAll(".link");
     var node = svg.selectAll(".node");
 
     var linkLen = 100;
 
-    force = d3.layout.force()
+    var force = d3.layout.force()
         .nodes(nodes)
         .links(links)
         .size([width,height])
@@ -48,11 +46,9 @@ function drawGraph(word, callback) {
         .alpha(0.1)
         .start();
 
-    var drag = d3.behavior.drag()
-        .origin(function(d) { return d; })
+    var drag = force.drag()
         .on("dragstart", dragstarted)
-        .on("drag", dragged)
-        .on("dragend", dragended);
+        .on("drag", dragged);
 
     node = svg.selectAll(".node")
         .data(nodes)
@@ -89,15 +85,10 @@ function drawGraph(word, callback) {
 
     function dragstarted(d) {
         d3.event.sourceEvent.stopPropagation();
-        d3.select(this).classed("dragging", true);
     }
 
     function dragged(d) {
-        d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
-    }
-
-    function dragended(d) {
-        d3.select(this).classed("dragging", false);
+        d3.select(this).attr("x", d.x = d3.event.x).attr("y", d.y = d3.event.y);
     }
 
     if (typeof callback === "function") callback();
