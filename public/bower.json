@@ -1,6 +1,7 @@
 {
   "name": "DS lab 1",
   "dependencies": {
-    "bootstrap": "~3.3.4"
+    "bootstrap": "~3.3.4",
+    "d3": "~3.5.5"
   }
 }

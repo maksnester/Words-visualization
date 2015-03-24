@@ -75,3 +75,19 @@ main > .row {
     margin: 40px auto;
     border: none;
 }
+
+#graph {
+    height: 100%;
+}
+
+.link {
+    stroke: #000;
+    stroke-width: 1.5px;
+}
+
+.node-circle {
+    cursor: move;
+    fill: #ccc;
+    stroke: #000;
+    stroke-width: 1.5px;
+}

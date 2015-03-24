@@ -21,6 +21,7 @@ $(document).on('ready', function () {
 });
 
 function getWords() {
+    setGraphButtonEnabled(false);
     clearContainers();
     var searched = $('#search > input')[0].value;
     if (searched) {
@@ -60,7 +61,11 @@ function fillContainerWithLinks(word, container) {
         method: 'get',
         success: function(jqXHR) {
             // object copy
-            if (container === PRIMARY_LINKS) currentWord = $.extend(true, {}, jqXHR);
+            // in fact - current word it's a word choosen from first container
+            if (container === PRIMARY_LINKS) {
+                currentWord = $.extend(true, {}, jqXHR[0]);
+                setGraphButtonEnabled(true);
+            }
 
             if (jqXHR[0] && jqXHR[0].links) {
                 hideLoader(container, function() {
@@ -183,4 +188,14 @@ function createAjaxLoaders() {
         "primary-links": ajaxLoader.cloneNode(),
         "secondary-links": ajaxLoader.cloneNode()
     };
+}
+
+function setGraphButtonEnabled(isEnabled) {
+    var graphButton = document.querySelectorAll('#search > button')[1];
+    if (isEnabled) graphButton.classList.remove('disabled');
+    else graphButton.classList.add('disabled');
+
+    if (!isEnabled) {
+        clearGraph();
+    }
 }
