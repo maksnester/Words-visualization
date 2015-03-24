@@ -82,12 +82,17 @@ main > .row {
 
 .link {
     stroke: #000;
-    stroke-width: 1.5px;
+    stroke-width: 1px;
 }
 
 .node-circle {
     cursor: move;
     fill: #ccc;
     stroke: #000;
-    stroke-width: 1.5px;
+    stroke-width: 2px;
+}
+
+.overlay {
+    fill: none;
+    pointer-events: all;
 }

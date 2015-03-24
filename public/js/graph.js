@@ -16,7 +16,19 @@ function drawGraph(word, callback) {
     var height = graph.offsetHeight;
     var width = graph.offsetWidth;
 
-    var svg = d3.select("#graph").append("svg").attr("width", width).attr("height", height);
+    var svg = d3.select("#graph").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+        .append("g")
+            .call(d3.behavior.zoom().scaleExtent([1,8]).on("zoom", zoom))
+        .append("g");
+
+    svg.append("rect")
+        .attr("class", "overlay")
+        .attr("width", width)
+        .attr("height", height);
+
+
 
     var link = svg.selectAll(".link");
     var node = svg.selectAll(".node");
@@ -36,11 +48,17 @@ function drawGraph(word, callback) {
         .alpha(0.1)
         .start();
 
+    var drag = d3.behavior.drag()
+        .origin(function(d) { return d; })
+        .on("dragstart", dragstarted)
+        .on("drag", dragged)
+        .on("dragend", dragended);
+
     node = svg.selectAll(".node")
         .data(nodes)
         .enter().append("g")
         .attr("class", "node")
-        .call(force.drag);
+        .call(drag);
 
     node.append("circle")
         .attr("class", "node-circle")
@@ -64,6 +82,23 @@ function drawGraph(word, callback) {
 
         node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
     });
+
+    function zoom() {
+        svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+    }
+
+    function dragstarted(d) {
+        d3.event.sourceEvent.stopPropagation();
+        d3.select(this).classed("dragging", true);
+    }
+
+    function dragged(d) {
+        d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+    }
+
+    function dragended(d) {
+        d3.select(this).classed("dragging", false);
+    }
 
     if (typeof callback === "function") callback();
 }
