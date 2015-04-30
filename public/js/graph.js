@@ -65,6 +65,15 @@ function drawGraph(word, callback) {
         .on("dragstart", dragstarted)
         .on("drag", dragged);
 
+    link = svg.selectAll(".link")
+        .data(links)
+        .enter().append("line")
+        .attr("class", "link")
+        .attr("stroke-width", function(d) {
+            var w = 1 + (d.target.sentences ? d.target.sentences.length - 1 : 0);
+            return (w > 10) ? 10 : w;
+        });
+
     node = svg.selectAll(".node")
         .data(nodes)
         .enter().append("g")
@@ -74,18 +83,15 @@ function drawGraph(word, callback) {
 
     node.append("circle")
         .attr("class", "node-circle")
-        .attr("r", function(d) {return 8 + (d.sentences ? d.sentences.length * 3 : 1)});
+        .attr("r", function(d) {
+            var r = 8 + (d.sentences ? d.sentences.length * 3 : 1);
+            return (r > 60) ? 60 : r;
+        });
 
     node.append("text")
         .attr("x", 12)
         .attr("y", ".35em")
         .text(function(d) { return d.word; });
-
-    link = svg.selectAll(".link")
-        .data(links)
-        .enter().append("line")
-        .attr("class", "link")
-        .attr("stroke-width", function(d) {return 1 + (d.target.sentences ? d.target.sentences.length - 1 : 0)});
 
     force.on("tick", function() {
         link.attr("x1", function(d) { return d.source.x; })
@@ -136,6 +142,9 @@ function drawGraph(word, callback) {
  * @param data - object like: {_id: String, links: [_word: string, sentences[numbers]}
  */
 function prepareData(data) {
+    if (data.links.length > 500) {
+        data.links.length = 500;
+    }
     //data it's a word linked with another words by sentences.
     //words = nodes, sentences = links
 

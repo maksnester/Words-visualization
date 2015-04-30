@@ -102,7 +102,7 @@ function hideLoader(name, callback) {
         if (typeof(callback) === "function") {
             callback();
         }
-    }, 1000);
+    }, 600);
 }
 
 /**
@@ -119,12 +119,30 @@ function convertArrayToList(array, field) {
     return ('<li>' + arrayOfWords.join('</li><li>') + '</li>');
 }
 
+var choosenWords = {
+    "words": null,
+    "primary-links": null
+};
 function addWordsClickListeners() {
     containers[WORDS].on('click', '> li', function () {
         showPrimaryLinks(this.textContent || this.innerText);
+        if (choosenWords[WORDS]) {
+            choosenWords[WORDS].style.textDecoration = 'none';
+            choosenWords[WORDS].style.fontWeight = null;
+        }
+        this.style.textDecoration = 'underline';
+        this.style.fontWeight = 'bold';
+        choosenWords[WORDS] = this;
     });
     containers[PRIMARY_LINKS].on('click', '> li', function () {
         showSecondaryLinks(this.textContent || this.innerText);
+        if (choosenWords[PRIMARY_LINKS]) {
+            choosenWords[PRIMARY_LINKS].style.textDecoration = 'none';
+            choosenWords[PRIMARY_LINKS].style.fontWeight = null;
+        }
+        this.style.textDecoration = 'underline';
+        this.style.fontWeight = 'bold';
+        choosenWords[PRIMARY_LINKS] = this;
     });
 }
 
