@@ -68,6 +68,6 @@ function startServer() {
     });
 
     app.listen(8080, function () {
-        console.info("Server started");
+        console.info("Server started at 8080 port");
     });
 }
