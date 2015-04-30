@@ -28,14 +28,15 @@ You need the following components are pre-installed to run this app:
 + npm
 + bower
 
-After you could run app with a few steps:
-```git clone https://github.com/Alendorff/Connected-nouns.git```
-```cd Connected-nouns```
-```npm install```
-```cd ./public```
-```bower install```
-```cd ../```
-
+After you could run app with a few steps:  
+```
+git clone https://github.com/Alendorff/Connected-nouns.git  
+cd Connected-nouns  
+npm install  
+cd ./public  
+bower install 
+cd ../ 
+```
 To perform the following steps, you will need a running mongodb instance.
 
 ```
