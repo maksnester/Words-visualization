@@ -1,4 +1,4 @@
-#Connected nouns
+#Words visualization
 This is a client-server app with mongodb and node.js on the server side.
 
 ###Description
